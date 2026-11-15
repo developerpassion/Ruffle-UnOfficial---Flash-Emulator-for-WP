@@ -1,0 +1,41 @@
+[package]
+name = "ruffle_uwp"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+# Crate độc lập (không nằm trong workspace ruffle) để giữ upstream sạch.
+[workspace]
+
+[lib]
+crate-type = ["staticlib", "rlib"]
+
+[dependencies]
+ruffle_core = { path = "../../../ruffle/core", default-features = false, features = ["default_compatibility_rules", "lzma", "audio", "mp3", "nellymoser"] }
+ruffle_render = { path = "../../../ruffle/render", features = ["tessellator"] }
+ruffle_video = { path = "../../../ruffle/video" }
+swf = { path = "../../../ruffle/swf" }
+tracing = "0.1"
+# Cùng phiên bản với workspace ruffle (dùng cho NavigatorBackend)
+url = "2.5.8"
+async-channel = "2.5.0"
+encoding_rs = "0.8.35"
+
+[features]
+default = []
+audio = []  # luôn bật trong ruffle_core (xem dependencies)
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+debug = 1
+
+[profile.dev]
+panic = "abort"
+opt-level = 1
+
+[dev-dependencies]
+png = "0.18"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }

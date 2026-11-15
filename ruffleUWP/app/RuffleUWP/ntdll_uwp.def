@@ -1,0 +1,7 @@
+; Import library tối giản cho ntdll (SDK không có ntdll.lib ARM cho UWP).
+; scripts/package.ps1 tạo lib/<Platform>/release/ntdll_uwp.lib bằng lib.exe /def.
+LIBRARY ntdll.dll
+EXPORTS
+    NtClose
+    NtQuerySystemTime
+    RtlNtStatusToDosError

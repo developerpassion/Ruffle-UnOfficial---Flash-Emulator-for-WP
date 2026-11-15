@@ -1,0 +1,30 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 11.0.50727.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RuffleWP80", "RuffleWP80\RuffleWP80.csproj", "{D1E5B7A3-6C2F-4A89-8B14-7E3F9C0A5D26}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RuffleWP80Native", "RuffleWP80Native\RuffleWP80Native.vcxproj", "{4A7E2C93-1D5B-4E68-B0F2-6C8D3A9E1B52}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|ARM = Debug|ARM
+		Release|ARM = Release|ARM
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D1E5B7A3-6C2F-4A89-8B14-7E3F9C0A5D26}.Debug|ARM.ActiveCfg = Debug|ARM
+		{D1E5B7A3-6C2F-4A89-8B14-7E3F9C0A5D26}.Debug|ARM.Build.0 = Debug|ARM
+		{D1E5B7A3-6C2F-4A89-8B14-7E3F9C0A5D26}.Debug|ARM.Deploy.0 = Debug|ARM
+		{D1E5B7A3-6C2F-4A89-8B14-7E3F9C0A5D26}.Release|ARM.ActiveCfg = Release|ARM
+		{D1E5B7A3-6C2F-4A89-8B14-7E3F9C0A5D26}.Release|ARM.Build.0 = Release|ARM
+		{D1E5B7A3-6C2F-4A89-8B14-7E3F9C0A5D26}.Release|ARM.Deploy.0 = Release|ARM
+		{4A7E2C93-1D5B-4E68-B0F2-6C8D3A9E1B52}.Debug|ARM.ActiveCfg = Debug|ARM
+		{4A7E2C93-1D5B-4E68-B0F2-6C8D3A9E1B52}.Debug|ARM.Build.0 = Debug|ARM
+		{4A7E2C93-1D5B-4E68-B0F2-6C8D3A9E1B52}.Release|ARM.ActiveCfg = Release|ARM
+		{4A7E2C93-1D5B-4E68-B0F2-6C8D3A9E1B52}.Release|ARM.Build.0 = Release|ARM
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

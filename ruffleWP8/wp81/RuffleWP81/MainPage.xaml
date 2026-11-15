@@ -1,0 +1,10 @@
+<Page x:Class="RuffleWP81.MainPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Background="Black">
+        <SwapChainPanel x:Name="swapChainPanel" />
+        <!-- M1: kết quả kiểm tra (D3D11 + lõi Rust) -->
+        <TextBlock x:Name="statusText" Margin="12,24,12,0" FontSize="16" Foreground="#00FF66"
+                   TextWrapping="Wrap" IsHitTestVisible="False" />
+    </Grid>
+</Page>

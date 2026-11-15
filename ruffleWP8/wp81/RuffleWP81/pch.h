@@ -1,0 +1,11 @@
+#pragma once
+#include <collection.h>
+#include <ppltasks.h>
+#include <wrl.h>
+#include <d3d11_2.h>
+#include <dxgi1_3.h>
+#include <windows.ui.xaml.media.dxinterop.h>
+#include <string>
+#include <vector>
+#include <cstdio>
+#include "App.xaml.h"

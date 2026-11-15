@@ -1,0 +1,54 @@
+# Upstream Ruffle (clone riêng, không commit vào repo này)
+/ruffle/
+
+# Rust
+target/
+
+# Staticlib build ra (~200 MB, quá giới hạn 100 MB của GitHub) — tạo lại bằng scripts/build-rust.ps1
+ruffleUWP/lib/
+
+# Output build Visual Studio / MSBuild
+ruffleUWP/ARM/
+ruffleUWP/x64/
+ruffleUWP/app/RuffleUWP/ARM/
+ruffleUWP/app/RuffleUWP/x64/
+ruffleUWP/app/RuffleUWP/Generated Files/
+ruffleUWP/AppPackages/
+ruffleUWP/BundleArtifacts/
+.vs/
+*.user
+*.suo
+*.VC.db
+*.VC.opendb
+*.ipch
+*.aps
+
+# Output build ruffleWP8 (wp80 / wp81 / wp81sl): MSBuild, .xap/.appx, file sinh ra
+ruffleWP8/**/ARM/
+ruffleWP8/**/AppPackages/
+ruffleWP8/**/BundleArtifacts/
+ruffleWP8/**/Bin/
+ruffleWP8/**/obj/
+ruffleWP8/**/Generated Files/
+ruffleWP8/**/*.xap
+ruffleWP8/**/*.appx
+ruffleWP8/**/*.appxsym
+ruffleWP8/**/*.appxupload
+ruffleWP8/wp80/imports.txt
+# Spike link/probe: object, DLL, lib và log tạo bởi các script .cmd/.py (giữ script lại)
+ruffleWP8/spike/**/*.obj
+ruffleWP8/spike/**/*.dll
+ruffleWP8/spike/**/*.lib
+ruffleWP8/spike/**/*.exp
+ruffleWP8/spike/**/*.txt
+ruffleWP8/spike/probe80/gen/
+
+# Output test / debug
+ruffleUWP/test-out/
+*.log
+
+# Game test (bản quyền của tác giả game, không commit)
+/*.swf
+
+# Công cụ tải về (JPEXS ffdec...)
+/tools/

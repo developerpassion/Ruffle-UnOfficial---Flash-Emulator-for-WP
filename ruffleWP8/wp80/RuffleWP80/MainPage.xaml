@@ -1,0 +1,139 @@
+<phone:PhoneApplicationPage x:Class="RuffleWP80.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    SupportedOrientations="PortraitOrLandscape" Orientation="Portrait"
+    shell:SystemTray.IsVisible="False">
+    <!-- Dùng chung cho Silverlight 8.0 (wp80) và 8.1 (wp81sl liên kết file này).
+         DrawingSurfaceBackgroundGrid phải là phần tử gốc của trang. Lõi Rust vẽ vào nền qua RufflePlayer80.
+         Grid nền KHÔNG tự xoay: trang báo hướng cho native (SetOrientation), GPU xoay hình khi present.
+         Chạm lấy qua Touch.FrameReported (không phụ thuộc hit-test); 2 ngón = zoom/kéo. -->
+    <phone:PhoneApplicationPage.ApplicationBar>
+        <!-- Chỉ hiện khi đang chơi: thanh thu nhỏ "..." ở mép, mờ để không che game -->
+        <shell:ApplicationBar Mode="Minimized" Opacity="0.6" IsVisible="False">
+            <shell:ApplicationBar.MenuItems>
+                <shell:ApplicationBarMenuItem Text="settings" Click="OnAppBarSettings" />
+                <shell:ApplicationBarMenuItem Text="reset zoom" Click="OnAppBarResetZoom" />
+                <shell:ApplicationBarMenuItem Text="back to list" Click="OnAppBarBack" />
+            </shell:ApplicationBar.MenuItems>
+        </shell:ApplicationBar>
+    </phone:PhoneApplicationPage.ApplicationBar>
+
+    <DrawingSurfaceBackgroundGrid x:Name="DrawingSurfaceBackground" SizeChanged="OnSurfaceSizeChanged">
+        <!-- Danh sách SWF -->
+        <Grid x:Name="menuPanel" Background="#FF1E2A44">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <TextBlock Text="Ruffle" FontSize="48" Margin="24,24,24,0" Foreground="White" />
+            <StackPanel Grid.Row="1" Margin="24,8,24,8">
+                <TextBlock x:Name="hintText" TextWrapping="Wrap" FontSize="20" Foreground="#FFCCCCCC"
+                           Text="Browse .swf files on the SD card and files you opened from email or the browser." />
+                <Button x:Name="browseButton" Content="Browse SWF files..." HorizontalAlignment="Stretch" Margin="0,12,0,0" Click="OnBrowseClick" />
+                <!-- Chỉ bản Silverlight 8.1 (WP81SL) có file picker hệ thống: Documents, Downloads, OneDrive... -->
+                <Button x:Name="pickButton" Content="System file picker..." HorizontalAlignment="Stretch" Visibility="Collapsed" Click="OnPickClick" />
+                <Button Content="Open URL..." HorizontalAlignment="Stretch" Click="OnUrlClick" />
+                <Button Content="Receive over Wi-Fi..." HorizontalAlignment="Stretch" Click="OnWifiClick" />
+                <Button x:Name="settingsButton" Content="Settings" HorizontalAlignment="Stretch" Click="OnSettingsClick" />
+            </StackPanel>
+        </Grid>
+
+        <!-- Tải .swf từ URL về thư mục Received rồi chơi -->
+        <Grid x:Name="urlPanel" Background="#F5141D30" Visibility="Collapsed">
+            <StackPanel Margin="24,24,24,24">
+                <TextBlock Text="Open URL" FontSize="40" Foreground="White" />
+                <TextBlock TextWrapping="Wrap" FontSize="18" Foreground="#FF9AA8C8" Margin="12,0,12,8"
+                           Text="Link to a .swf file. It is downloaded, kept in 'Opened from email / browser' and played." />
+                <TextBox x:Name="urlBox" InputScope="Url" />
+                <ProgressBar x:Name="urlProgress" Maximum="100" Margin="0,8,0,4" Foreground="#FFFFC857" Visibility="Collapsed" />
+                <TextBlock x:Name="urlStatus" TextWrapping="Wrap" FontSize="18" Foreground="#FFFFC857" Margin="12,0,12,8" />
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="urlGoButton" Content="Download" Click="OnUrlGo" />
+                    <Button Content="Close" Click="OnUrlClose" />
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+
+        <!-- Nhận .swf qua Wi-Fi: server HTTP trên máy, mở địa chỉ bằng trình duyệt máy tính/máy khác để tải lên -->
+        <Grid x:Name="wifiPanel" Background="#F5141D30" Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <StackPanel Margin="24,24,24,8">
+                <TextBlock Text="Receive over Wi-Fi" FontSize="40" Foreground="White" />
+                <TextBlock TextWrapping="Wrap" FontSize="18" Foreground="#FF9AA8C8"
+                           Text="On a computer or another device on the same Wi-Fi, open this address in a browser and upload .swf files. Keep this screen open." />
+                <TextBlock x:Name="wifiAddress" TextWrapping="Wrap" FontSize="30" Foreground="#FFFFC857" Margin="0,12,0,4" />
+                <ProgressBar x:Name="wifiProgress" Maximum="100" Margin="0,8,0,4" Foreground="#FFFFC857" Visibility="Collapsed" />
+                <TextBlock x:Name="wifiStatus" TextWrapping="Wrap" FontSize="18" Foreground="#FFCCCCCC" />
+            </StackPanel>
+            <ListBox x:Name="wifiList" Grid.Row="1" Margin="24,0,24,0" SelectionChanged="OnWifiFileSelected">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" FontSize="26" Foreground="White" Margin="0,6,0,6" TextWrapping="Wrap" />
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            <Button Grid.Row="2" Content="Close" HorizontalAlignment="Left" Margin="12,4,12,12" Click="OnWifiClose" />
+        </Grid>
+
+        <!-- Popup chọn file dạng cây thư mục. Bấm thư mục = mở/đóng, bấm file = chơi. Back = đóng -->
+        <Grid x:Name="filePanel" Background="#F5141D30" Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <StackPanel Margin="24,24,24,8">
+                <TextBlock Text="Choose a SWF" FontSize="40" Foreground="White" />
+                <TextBlock x:Name="fileStatus" TextWrapping="Wrap" FontSize="18" Foreground="#FF9AA8C8" />
+            </StackPanel>
+            <ListBox x:Name="treeList" Grid.Row="1" Margin="12,0,12,0" SelectionChanged="OnTreeSelected">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal" Margin="{Binding Indent}">
+                            <TextBlock Text="{Binding Glyph}" Width="36" FontSize="28" Foreground="#FFFFC857" />
+                            <StackPanel>
+                                <TextBlock Text="{Binding Name}" FontSize="26" Foreground="White" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding Detail}" FontSize="16" Foreground="#FF9AA8C8" />
+                            </StackPanel>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="12,4,12,12">
+                <Button x:Name="refreshButton" Content="Refresh" Click="OnRefreshClick" />
+                <Button Content="Close" Click="OnFilePanelClose" />
+            </StackPanel>
+        </Grid>
+
+        <!-- FPS (Settings > Show FPS) -->
+        <TextBlock x:Name="fpsText" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="8,4,0,0" FontSize="16"
+                   Foreground="#FF00FF66" IsHitTestVisible="False" Visibility="Collapsed" />
+
+        <!-- Settings (mở từ danh sách hoặc thanh app khi đang chơi) -->
+        <Grid x:Name="settingsPanel" Background="#F01E2A44" Visibility="Collapsed">
+            <ScrollViewer>
+                <StackPanel Margin="24,24,24,24">
+                    <TextBlock Text="Settings" FontSize="40" Foreground="White" Margin="0,0,0,12" />
+                    <CheckBox x:Name="gpuCheck" Content="GPU rendering" Click="OnSettingChanged" />
+                    <CheckBox x:Name="msaaCheck" Content="MSAA 4x anti-aliasing" Click="OnSettingChanged" />
+                    <CheckBox x:Name="soundCheck" Content="Sound" Click="OnSettingChanged" />
+                    <CheckBox x:Name="fpsCheck" Content="Show FPS" Click="OnSettingChanged" />
+                    <!-- Bấm để đổi vòng qua các giá trị (SDK không có ComboBox/ListPicker cho WP 8.0) -->
+                    <Button x:Name="scaleButton" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Click="OnScaleClick" />
+                    <Button x:Name="qualityButton" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Click="OnQualityClick" />
+                    <Button x:Name="limitButton" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Click="OnLimitClick" />
+                    <TextBlock x:Name="settingsNote" TextWrapping="Wrap" FontSize="18" Foreground="#FF9AA8C8" Margin="12,8,12,0"
+                               Text="Changing GPU rendering reloads the running game. Lower render resolution = smoother on large screens." />
+                    <TextBlock x:Name="versionText" FontSize="18" Foreground="#FF9AA8C8" Margin="12,8,12,12" />
+                    <Button Content="Close" HorizontalAlignment="Left" Click="OnSettingsClose" />
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </DrawingSurfaceBackgroundGrid>
+</phone:PhoneApplicationPage>
